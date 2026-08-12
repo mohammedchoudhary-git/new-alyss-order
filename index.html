@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Aly's Dessert — Order</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff9f1;--paper:#fffdf9;--text:#2b1810;--muted:#705d4d;--line:#ead9be;--green:#0f7a3d;--red:#a13930;--orange:#e86a17;--navy:#173a63}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:Montserrat,Arial,sans-serif}
+.wrap{max-width:680px;margin:auto;padding:18px 14px 50px}.top{border-bottom:3px solid var(--text);padding:8px 4px 16px;margin-bottom:18px}.eyebrow{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--orange)}h1{margin:5px 0;font-size:28px}.sub{font-size:12px;color:var(--muted)}
+.offer{background:#173a63;color:white;border-radius:14px;padding:15px;margin-bottom:16px}.offer h3{margin:0 0 6px;font-size:14px}.offer p{margin:0;font-size:12px;opacity:.9}.badge{display:inline-block;margin-top:9px;background:white;color:#173a63;border-radius:999px;padding:6px 10px;font-size:11px;font-weight:800}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:16px}.section{margin:8px 0 18px}.section-title{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--orange);border-bottom:1px solid var(--line);padding-bottom:7px;margin-bottom:6px}.item{display:grid;grid-template-columns:1fr auto;gap:12px;padding:11px 0;border-bottom:1px solid #f1e7d7}.item:last-child{border-bottom:0}.name{font-size:13px;font-weight:700}.price{font-size:12px;color:var(--muted);margin-top:3px}.stock{font-size:10px;color:var(--red);font-weight:800;margin-top:3px}.qty{display:flex;align-items:center;gap:8px}.qty button{width:30px;height:30px;border:1px solid var(--line);border-radius:8px;background:white;font:700 16px Montserrat;cursor:pointer}.qty button:disabled{opacity:.35;cursor:not-allowed}.q{width:18px;text-align:center;font-weight:700}
+label{display:block;margin-top:15px;margin-bottom:6px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--orange)}input,select{width:100%;padding:12px;border:1px solid var(--line);border-radius:9px;background:white;font:500 14px Montserrat;color:var(--text)}.total{display:flex;justify-content:space-between;border-top:2px solid var(--text);margin-top:18px;padding-top:14px;font-weight:800}.total b{font-size:22px;color:var(--navy)}
+button.primary,button.secondary,button.danger{border:0;border-radius:10px;padding:13px 15px;font:700 12px Montserrat;cursor:pointer;margin-top:14px}.primary{width:100%;background:var(--green);color:white}.secondary{background:var(--navy);color:white}.danger{background:var(--red);color:white}.upi{display:none;margin-top:10px;padding:10px;border:1px dashed var(--line);border-radius:9px;font-size:11px;color:var(--muted);line-height:1.5}.confirm{text-align:center;padding:25px 8px}.confirm h2{font-size:21px}.confirm p{font-size:13px;color:var(--muted);line-height:1.6}.actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.actions button{margin-top:8px}.note{font-size:10px;color:var(--muted);text-align:center;margin:18px 5px;line-height:1.5}
+@media(max-width:480px){h1{font-size:24px}.item{grid-template-columns:1fr auto}}
+</style>
+</head>
+<body><main class="wrap">
+<header class="top"><div class="eyebrow">Order Now</div><h1>Aly's Dessert</h1><div class="sub">Crafted with Love, Served with Sweetness</div></header>
+<section class="offer"><h3>🇮🇳 80 Years, 80 Rupees — Independence Day Special</h3><p>15th & 16th August only · Selected Bowl Cakes & Pancakes at ₹80</p><span id="offerBadge" class="badge">Loading offer…</span></section>
+<div id="app"></div>
+<div class="note">Gulshan Colony, E/49, 4th Floor, Next to Police Quarter, Versova, Andheri West, Mumbai – 400061</div>
+</main>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, doc, setDoc, getDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, where, getDocs, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig={apiKey:"AIzaSyA_ZgpKwEONBz219iFCSE713nPu1bpnJug",authDomain:"alys-desert.firebaseapp.com",projectId:"alys-desert",storageBucket:"alys-desert.firebasestorage.app",messagingSenderId:"999834394416",appId:"1:999834394416:web:41834966a5e01afda0f2f5"};
+const db=getFirestore(initializeApp(firebaseConfig));
+const ordersCol=collection(db,"orders"), settingsRef=doc(db,"settings","menu");
+
+const OFFER_BOWL=[
+{id:"off_bowl_triple",name:"Triple Chocolate Bowl (300ml)",price:80},{id:"off_bowl_milk",name:"Milk Bowl Cake (300ml)",price:80},{id:"off_bowl_white",name:"White Bowl Cake (300ml)",price:80},{id:"off_bowl_dark",name:"Dark Bowl Cake (300ml)",price:80},{id:"off_bowl_double",name:"Double Bowl Cake — Milk & Dark (300ml)",price:80}];
+const OFFER_PANCAKE=[
+{id:"off_pc_triple",name:"Triple Chocolate Pancake (9 pcs)",price:80},{id:"off_pc_milk",name:"Milk Pancake (9 pcs)",price:80},{id:"off_pc_white",name:"White Pancake (9 pcs)",price:80},{id:"off_pc_dark",name:"Dark Pancake (9 pcs)",price:80},{id:"off_pc_double",name:"Double Pancake — Milk & Dark (9 pcs)",price:80}];
+const COMBO=[{id:"combo_mega",name:"Mega Combo — Triple Choc Bowl (500ml) + Chocochip Pancake Bowl",price:200}];
+const REGULAR=[
+{id:"reg_triple",name:"Triple Chocolate (500ml)",price:150},{id:"reg_double",name:"Double Chocolate (500ml)",price:170},{id:"reg_choc",name:"Chocolate (500ml)",price:130},{id:"reg_white",name:"White Chocolate (500ml)",price:170},{id:"reg_dark",name:"Dark Chocolate (500ml)",price:140},{id:"reg_kitkat",name:"KitKat (500ml)",price:170},{id:"reg_biscoff",name:"Biscoff (500ml)",price:200},{id:"reg_biscoffk",name:"Biscoff Kunafa (500ml)",price:230},{id:"reg_pista",name:"Pistachio (500ml)",price:200},{id:"reg_pistak",name:"Pistachio Kunafa (500ml)",price:230},{id:"reg_crunch",name:"Choco Crunch (500ml)",price:200}];
+const ALL=[...OFFER_BOWL,...OFFER_PANCAKE,...COMBO,...REGULAR], OFFER_IDS=new Set([...OFFER_BOWL,...OFFER_PANCAKE].map(x=>x.id));
+let qty=Object.fromEntries(ALL.map(x=>[x.id,0])), outOfStock=new Set(), offerLimit=20, activeOfferOrders=0, editId=null, editOrder=null;
+
+function cleanPhone(v){let d=v.replace(/\D/g,"");return d.length===10?"91"+d:d}
+function menuSection(title,items){return `<div class="section"><div class="section-title">${title}</div>${items.map(m=>{let off=outOfStock.has(m.id);return `<div class="item"><div><div class="name">${m.name}</div><div class="price">₹${m.price}</div>${off?'<div class="stock">OUT OF STOCK</div>':''}</div><div class="qty"><button data-id="${m.id}" data-d="-1" ${off?'disabled':''}>−</button><span class="q" id="q-${m.id}">${qty[m.id]}</span><button data-id="${m.id}" data-d="1" ${off?'disabled':''}>+</button></div></div>`}).join("")}</div>`}
+function total(){return ALL.reduce((s,m)=>s+qty[m.id]*m.price,0)}
+function bindQty(){document.querySelectorAll("[data-id]").forEach(b=>b.onclick=()=>{let id=b.dataset.id,d=+b.dataset.d;qty[id]=Math.max(0,qty[id]+d);renderForm()})}
+function renderForm(){
+ const app=document.getElementById("app");
+ if(editOrder){app.innerHTML=confirmView(editOrder,true);bindConfirm();return}
+ app.innerHTML=`<div class="card">${menuSection("Offer Bowl Cakes — ₹80",OFFER_BOWL)}${menuSection("Offer Pancakes — ₹80",OFFER_PANCAKE)}${menuSection("Combo",COMBO)}${menuSection("Regular Menu",REGULAR)}
+ <label>Your name</label><input id="name" value="${editId&&editOrder?.name||""}" placeholder="e.g. Riya Sharma">
+ <label>Phone number</label><input id="phone" type="tel" placeholder="e.g. 98765 43210">
+ <label>Room / Flat no.</label><input id="room" placeholder="e.g. B-204">
+ <label>Payment mode</label><select id="pay"><option>Cash on delivery</option><option>UPI / GPay</option><option>Already paid</option></select>
+ <div class="upi" id="upiBox">UPI selected. Add the client's UPI ID / QR in the Firebase settings or code before collecting live payments.</div>
+ <div class="total"><span>Total</span><b>₹${total()}</b></div><button id="submit" class="primary">${editId?"Update order":"Send order"}</button></div>`;
+ bindQty();
+ document.getElementById("pay").onchange=e=>document.getElementById("upiBox").style.display=e.target.value==="UPI / GPay"?"block":"none";
+ document.getElementById("submit").onclick=submitOrder;
+ if(editId){document.getElementById("name").value=editOrder.name;document.getElementById("phone").value=editOrder.phone;document.getElementById("room").value=editOrder.room;document.getElementById("pay").value=editOrder.pay}
+}
+function confirmView(o,editable=true){let left=Math.max(0,Math.ceil((o.editableUntil-Date.now())/60000));return `<div class="card confirm"><div>✓ ORDER RECEIVED</div><h2>Thank you, ${o.name}!</h2><p>Your order has been sent to the kitchen.${editable&&left>0?` You can edit or cancel it for approximately ${left} more minute(s).`:" The edit window has ended."}</p><div class="actions">${editable&&left>0?'<button class="secondary" id="editBtn">Edit order</button><button class="danger" id="cancelBtn">Cancel order</button>':""}<button class="secondary" id="newBtn">Place another order</button></div></div>`}
+function bindConfirm(){document.getElementById("newBtn")?.addEventListener("click",()=>{editOrder=null;editId=null;qty=Object.fromEntries(ALL.map(x=>[x.id,0]));renderForm()});document.getElementById("editBtn")?.addEventListener("click",()=>{const o=editOrder;editOrder=null;editId=o.id;qty=Object.fromEntries(o.items.map(i=>[i.id||ALL.find(x=>x.name===i.name)?.id,i.qty]));ALL.forEach(x=>qty[x.id]??=0);renderForm()});document.getElementById("cancelBtn")?.addEventListener("click",async()=>{if(!confirm("Cancel this order?"))return;await updateDoc(doc(db,"orders",editOrder.id),{status:"cancelled",cancelledAt:new Date().toISOString()});editOrder=null;editId=null;renderForm()})}
+async function submitOrder(){
+ const name=document.getElementById("name").value.trim(), phoneRaw=document.getElementById("phone").value.trim(), room=document.getElementById("room").value.trim(), pay=document.getElementById("pay").value;
+ const items=ALL.filter(m=>qty[m.id]>0).map(m=>({id:m.id,name:m.name,qty:qty[m.id],price:m.price,offer:OFFER_IDS.has(m.id)}));
+ if(!name||!room||phoneRaw.replace(/\D/g,"").length<10||!items.length){alert("Please enter name, valid phone, room number and at least one product.");return}
+ const hasOffer=items.some(x=>x.offer); if(hasOffer&&activeOfferOrders>=offerLimit){alert("Sorry, all current offer slots are full.");return}
+ const btn=document.getElementById("submit");btn.disabled=true;
+ const phone=cleanPhone(phoneRaw), now=Date.now(), order={id:editId||("ord_"+now+"_"+Math.floor(Math.random()*1000)),name,phone,room,items,total:items.reduce((s,i)=>s+i.qty*i.price,0),pay,hasOffer,status:"new",paymentStatus:pay==="Cash on delivery"?"COD":pay==="Already paid"?"paid":"pending",editableUntil:now+600000,time:new Date().toISOString()};
+ try{
+   if(editId) await updateDoc(doc(db,"orders",editId),{...order,updatedAt:new Date().toISOString()}); else await setDoc(doc(db,"orders",order.id),order);
+   editId=null;editOrder=order;renderForm();
+ }catch(e){console.error(e);alert("Could not save the order. Check internet/Firebase rules.");btn.disabled=false}
+}
+onSnapshot(settingsRef,s=>{let d=s.exists()?s.data():{};outOfStock=new Set(d.outOfStock||[]);offerLimit=Number(d.offerLimit||20);renderForm()});
+onSnapshot(query(ordersCol,orderBy("time","desc")),s=>{let orders=s.docs.map(x=>x.data());activeOfferOrders=orders.filter(o=>o.hasOffer&&o.status==="new").length;let left=Math.max(0,offerLimit-activeOfferOrders);document.getElementById("offerBadge").textContent=`${left} offer slot${left===1?"":"s"} left`;});
+renderForm();
+</script></body></html>
