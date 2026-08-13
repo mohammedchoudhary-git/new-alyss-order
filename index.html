@@ -13,7 +13,7 @@
 .offer{background:#173a63;color:white;border-radius:14px;padding:15px;margin-bottom:16px}.offer h3{margin:0 0 6px;font-size:14px}.offer p{margin:0;font-size:12px;opacity:.9}.badge{display:inline-block;margin-top:9px;background:white;color:#173a63;border-radius:999px;padding:6px 10px;font-size:11px;font-weight:800}
 .card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:16px}.section{margin:8px 0 18px}.section-title{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--orange);border-bottom:1px solid var(--line);padding-bottom:7px;margin-bottom:6px}.item{display:grid;grid-template-columns:1fr auto;gap:12px;padding:11px 0;border-bottom:1px solid #f1e7d7}.item:last-child{border-bottom:0}.name{font-size:13px;font-weight:700}.price{font-size:12px;color:var(--muted);margin-top:3px}.stock{font-size:10px;color:var(--red);font-weight:800;margin-top:3px}.qty{display:flex;align-items:center;gap:8px}.qty button{width:30px;height:30px;border:1px solid var(--line);border-radius:8px;background:white;font:700 16px Montserrat;cursor:pointer}.qty button:disabled{opacity:.35;cursor:not-allowed}.q{width:18px;text-align:center;font-weight:700}
 label{display:block;margin-top:15px;margin-bottom:6px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--orange)}input,select{width:100%;padding:12px;border:1px solid var(--line);border-radius:9px;background:white;font:500 14px Montserrat;color:var(--text)}.total{display:flex;justify-content:space-between;border-top:2px solid var(--text);margin-top:18px;padding-top:14px;font-weight:800}.total b{font-size:22px;color:var(--navy)}
-button.primary,button.secondary,button.danger{border:0;border-radius:10px;padding:13px 15px;font:700 12px Montserrat;cursor:pointer;margin-top:14px}.primary{width:100%;background:var(--green);color:white}.secondary{background:var(--navy);color:white}.danger{background:var(--red);color:white}.upi{display:none;margin-top:14px;padding:14px;border:1px dashed var(--line);border-radius:12px;font-size:12px;color:var(--muted);line-height:1.5;background:#fffaf3}.upi h3{margin:0 0 5px;font-size:13px;color:var(--text)}.upi p{margin:4px 0}.upi-qr{display:block;width:min(220px,100%);margin:12px auto;border-radius:12px;border:1px solid var(--line);background:#fff}.upi-id{display:flex;align-items:center;justify-content:space-between;gap:8px;background:white;border:1px solid var(--line);padding:9px 10px;border-radius:9px;margin-top:9px;font-size:11px;word-break:break-all}.upi-id button{margin:0;border:0;background:var(--navy);color:#fff;border-radius:7px;padding:7px 9px;font:700 10px Montserrat;cursor:pointer;white-space:nowrap}.upi-pay{display:block;width:100%;text-align:center;text-decoration:none;background:var(--green);color:white;border-radius:10px;padding:12px;margin-top:11px;font:700 12px Montserrat}.upi-help{font-size:10px;margin-top:8px!important}.confirm{text-align:center;padding:25px 8px}.confirm h2{font-size:21px}.confirm p{font-size:13px;color:var(--muted);line-height:1.6}.actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.actions button{margin-top:8px}.note{font-size:10px;color:var(--muted);text-align:center;margin:18px 5px;line-height:1.5}
+button.primary,button.secondary,button.danger{border:0;border-radius:10px;padding:13px 15px;font:700 12px Montserrat;cursor:pointer;margin-top:14px}.primary{width:100%;background:var(--green);color:white}.secondary{background:var(--navy);color:white}.danger{background:var(--red);color:white}.upi{display:none;margin-top:14px;padding:14px;border:1px dashed var(--line);border-radius:12px;font-size:12px;color:var(--muted);line-height:1.5;background:#fffaf3}.upi h3{margin:0 0 5px;font-size:13px;color:var(--text)}.upi p{margin:5px 0}.upi-qr{display:block;width:min(240px,100%);margin:14px auto 10px;border-radius:12px;border:1px solid var(--line);background:#fff}.upi-id{display:flex;align-items:center;justify-content:space-between;gap:8px;background:white;border:1px solid var(--line);padding:9px 10px;border-radius:9px;margin-top:9px;font-size:11px;word-break:break-all}.upi-id button{margin:0;border:0;background:var(--navy);color:#fff;border-radius:7px;padding:7px 9px;font:700 10px Montserrat;cursor:pointer;white-space:nowrap}.upi-help{font-size:10px;margin-top:10px!important}.pay-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--orange);margin-top:12px!important}.confirm{text-align:center;padding:25px 8px}.confirm h2{font-size:21px}.confirm p{font-size:13px;color:var(--muted);line-height:1.6}.actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.actions button{margin-top:8px}.note{font-size:10px;color:var(--muted);text-align:center;margin:18px 5px;line-height:1.5}
 @media(max-width:480px){h1{font-size:24px}.item{grid-template-columns:1fr auto}}
 </style>
 </head>
@@ -45,25 +45,27 @@ function cleanPhone(v){let d=v.replace(/\D/g,"");return d.length===10?"91"+d:d}
 function menuSection(title,items){return `<div class="section"><div class="section-title">${title}</div>${items.map(m=>{let off=outOfStock.has(m.id);return `<div class="item"><div><div class="name">${m.name}</div><div class="price">₹${m.price}</div>${off?'<div class="stock">OUT OF STOCK</div>':''}</div><div class="qty"><button data-id="${m.id}" data-d="-1" ${off?'disabled':''}>−</button><span class="q" id="q-${m.id}">${qty[m.id]}</span><button data-id="${m.id}" data-d="1" ${off?'disabled':''}>+</button></div></div>`}).join("")}</div>`}
 function total(){return ALL.reduce((s,m)=>s+qty[m.id]*m.price,0)}
 function bindQty(){document.querySelectorAll("[data-id]").forEach(b=>b.onclick=()=>{let id=b.dataset.id,d=+b.dataset.d;qty[id]=Math.max(0,qty[id]+d);renderForm()})}
-function upiLink(amount){
- const params=new URLSearchParams({
-  pa:"khizarchoudhary786-1@oksbi",
-  pn:"Aly's Dessert",
-  am:String(amount),
-  cu:"INR",
-  tn:"Aly's Dessert order"
- });
- return "upi://pay?"+params.toString();
-}
-function paymentBox(amount){
+function paymentBox(){
  return `<div class="upi" id="upiBox">
-   <h3>Scan & Pay with UPI / GPay</h3>
-   <p>Pay the exact order total of <b>₹${amount}</b>.</p>
+   <h3>Pay via UPI / GPay</h3>
+   <p><b>📷 Scan this QR code</b> using GPay, PhonePe, Paytm, or any UPI app.</p>
+   <p>You can also <b>save the QR image to your gallery</b> and use your UPI app's Scan from Gallery option.</p>
    <img class="upi-qr" src="payment-qr.jpeg" alt="Aly's Dessert UPI payment QR code">
+   <p class="pay-label">UPI ID</p>
    <div class="upi-id"><span>khizarchoudhary786-1@oksbi</span><button type="button" id="copyUpi">Copy</button></div>
-   <a class="upi-pay" id="openUpi" href="${upiLink(amount)}">Open UPI / GPay · ₹${amount}</a>
-   <p class="upi-help">On a mobile phone, the button opens a supported UPI app with the exact amount. If it does not open, scan the QR code or copy the UPI ID and pay manually.</p>
+   <p class="pay-label">GPay / PhonePe number</p>
+   <div class="upi-id"><span>9821285885</span><button type="button" id="copyPhone">Copy</button></div>
+   <p class="upi-help">After payment, return here and tap <b>Send order</b>. The kitchen team will verify the payment.</p>
  </div>`;
+}
+function copyText(value,buttonId){
+ document.getElementById(buttonId)?.addEventListener("click",async()=>{
+  try{
+   await navigator.clipboard.writeText(value);
+   const b=document.getElementById(buttonId);
+   if(b){b.textContent="Copied";setTimeout(()=>b.textContent="Copy",1400);}
+  }catch(e){prompt("Copy this:",value);}
+ });
 }
 function renderForm(){
  const app=document.getElementById("app");
@@ -74,20 +76,15 @@ function renderForm(){
  <label>Room / Flat no.</label><input id="room" placeholder="e.g. B-204">
  <label>Payment mode</label><select id="pay"><option>Cash on delivery</option><option>UPI / GPay</option></select>
  <div class="total"><span>Total</span><b>₹${amount}</b></div>
- ${paymentBox(amount)}
+ ${paymentBox()}
  <button id="submit" class="primary">Send order</button></div>`;
  bindQty();
  const pay=document.getElementById("pay"), upiBox=document.getElementById("upiBox");
  const toggleUpi=()=>upiBox.style.display=pay.value==="UPI / GPay"?"block":"none";
  pay.onchange=toggleUpi;
  toggleUpi();
- document.getElementById("copyUpi")?.addEventListener("click",async()=>{
-  const id="khizarchoudhary786-1@oksbi";
-  try{
-   await navigator.clipboard.writeText(id);
-   const b=document.getElementById("copyUpi"); b.textContent="Copied"; setTimeout(()=>b.textContent="Copy",1400);
-  }catch(e){ prompt("Copy this UPI ID:",id); }
- });
+ copyText("khizarchoudhary786-1@oksbi","copyUpi");
+ copyText("9821285885","copyPhone");
  document.getElementById("submit").onclick=submitOrder;
 }
 function confirmView(o){
