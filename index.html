@@ -2,329 +2,168 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Aly's Dessert — Order Now</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Aly's Dessert — Order</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --cream:#FFF9F1; --cocoa:#2B1810; --cocoa-soft:#5B4636;
-    --saffron:#E86A17; --saffron-deep:#C1560F; --navy:#173A63;
-    --green:#0F7A3D; --green-deep:#0B5E2F; --line:#EAD9BE; --paper:#FFFDF9;
-  }
-  *{box-sizing:border-box;}
-  body{margin:0;background:var(--cream);color:var(--cocoa);font-family:'Inter',sans-serif;min-height:100vh;-webkit-text-size-adjust:100%;}
-  .wrap{max-width:600px;margin:0 auto;padding:20px 16px 60px;}
-
-  .topbar{border-bottom:3px solid var(--cocoa);padding-bottom:14px;margin-bottom:22px;position:relative;}
-  .topbar::after{content:"";position:absolute;bottom:-3px;left:0;right:0;height:3px;background:linear-gradient(90deg, var(--saffron) 0 33%, #fff 33% 66%, var(--green) 66% 100%);}
-  .brand .eyebrow{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--saffron-deep);}
-  .brand h1{font-family:'Fraunces',serif;font-weight:700;font-size:30px;margin:0;letter-spacing:-0.01em;}
-  .brand .tagline{font-size:12px;color:var(--cocoa-soft);font-style:italic;}
-
-  .offer-banner{background:linear-gradient(90deg, var(--saffron), #F2A15C 45%, #F2A15C 55%, var(--green)); border-radius:16px;padding:2px;margin-bottom:20px;}
-  .offer-inner{background:var(--paper);border-radius:14px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
-  .offer-text .ot-title{font-family:'Fraunces',serif;font-size:17px;font-weight:700;margin:0 0 2px;}
-  .offer-text .ot-sub{font-size:12px;color:var(--cocoa-soft);}
-  .offer-badge{font-family:'Space Mono',monospace;font-size:11px;text-transform:uppercase;background:var(--navy);color:var(--cream);padding:6px 12px;border-radius:999px;white-space:nowrap;}
-  .offer-badge.sold-out{background:#A13930;}
-
-  .form-shell{background:var(--paper);border:1.5px solid var(--cocoa);border-radius:18px;padding:22px 20px;box-shadow:6px 6px 0 var(--line);}
-
-  .section-label{font-family:'Space Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--saffron-deep);margin:20px 0 8px;padding-bottom:6px;border-bottom:1.5px dashed var(--line);}
-  .section-label:first-child{margin-top:0;}
-  .section-label .price-tag{float:right;color:var(--navy);font-weight:700;}
-
-  .menu-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px dashed var(--line);gap:10px;}
-  .menu-item:last-child{border-bottom:none;}
-  .menu-item.disabled{opacity:.4;}
-  .menu-item .mi-name{font-weight:600;font-size:14px;}
-  .menu-item .mi-price{color:var(--cocoa-soft);font-size:12px;font-family:'Space Mono',monospace;}
-  .qty-stepper{display:flex;align-items:center;gap:8px;flex-shrink:0;}
-  .qty-stepper button{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--cocoa);background:var(--paper);font-size:16px;cursor:pointer;color:var(--cocoa);}
-  .qty-stepper button:disabled{opacity:.3;cursor:not-allowed;}
-  .qty-stepper button:not(:disabled):active{background:var(--cocoa);color:var(--cream);}
-  .qty-stepper .qval{width:16px;text-align:center;font-family:'Space Mono',monospace;font-weight:700;}
-
-  label{display:block;font-family:'Space Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--saffron-deep);margin-bottom:6px;margin-top:16px;}
-  input[type=text], input[type=tel], select{width:100%;padding:12px;border:1.5px solid var(--line);border-radius:9px;font-family:'Inter',sans-serif;font-size:16px;background:var(--cream);color:var(--cocoa);}
-  input:focus, select:focus{outline:none;border-color:var(--saffron);}
-
-  .total-row{display:flex;justify-content:space-between;align-items:baseline;margin-top:18px;padding-top:14px;border-top:2px solid var(--cocoa);}
-  .total-row .tlabel{font-family:'Space Mono',monospace;font-size:12px;text-transform:uppercase;}
-  .total-row .tval{font-family:'Fraunces',serif;font-size:24px;font-weight:700;color:var(--navy);}
-
-  .date-slots{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:8px 0 6px;}
-  .date-slot{border:1.5px solid var(--line);border-radius:10px;padding:10px;font-size:12px;cursor:pointer;background:var(--cream);text-align:left;}
-  .date-slot.selected{border-color:var(--green);box-shadow:0 0 0 2px rgba(15,122,61,.12)}
-  .date-slot.full{opacity:.55;cursor:not-allowed;}
-  .date-slot b{display:block;font-size:13px;margin-bottom:3px;}
-  .submit-btn{width:100%;margin-top:18px;padding:15px;border:none;border-radius:10px;background:var(--green);color:var(--paper);font-family:'Space Mono',monospace;font-size:13px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;}
-  .submit-btn:active{background:var(--green-deep);}
-  .submit-btn:disabled{background:#cbbfa9;cursor:not-allowed;}
-
-  .confirm{text-align:center;padding:36px 16px;}
-  .confirm .stamp{font-family:'Fraunces',serif;font-size:20px;color:var(--green);margin-bottom:8px;}
-  .confirm p{color:var(--cocoa-soft);font-size:14px;}
-  .confirm button{margin-top:16px;background:var(--paper);border:1.5px solid var(--cocoa);padding:10px 18px;border-radius:999px;font-family:'Space Mono',monospace;font-size:12px;text-transform:uppercase;cursor:pointer;}
-
-  .addr-note{text-align:center;font-size:11px;color:var(--cocoa-soft);margin-top:20px;line-height:1.5;}
-
-  @media(max-width:480px){ .brand h1{font-size:22px;} .form-shell{padding:16px 14px;} }
+:root{--bg:#fff9f1;--paper:#fffdf9;--text:#2b1810;--muted:#705d4d;--line:#ead9be;--green:#0f7a3d;--red:#a13930;--orange:#e86a17;--navy:#173a63}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:Montserrat,Arial,sans-serif}
+.wrap{max-width:680px;margin:auto;padding:18px 14px 50px}.top{border-bottom:3px solid var(--text);padding:8px 4px 16px;margin-bottom:18px}.eyebrow{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--orange)}h1{margin:5px 0;font-size:28px}.sub{font-size:12px;color:var(--muted)}
+.offer{background:#173a63;color:white;border-radius:14px;padding:15px;margin-bottom:16px}.offer h3{margin:0 0 6px;font-size:14px}.offer p{margin:0;font-size:12px;opacity:.9}.badge{display:inline-block;margin-top:9px;background:white;color:#173a63;border-radius:999px;padding:6px 10px;font-size:11px;font-weight:800}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:16px}.section{margin:8px 0 18px}.section-title{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--orange);border-bottom:1px solid var(--line);padding-bottom:7px;margin-bottom:6px}.item{display:grid;grid-template-columns:1fr auto;gap:12px;padding:11px 0;border-bottom:1px solid #f1e7d7}.item:last-child{border-bottom:0}.name{font-size:13px;font-weight:700}.price{font-size:12px;color:var(--muted);margin-top:3px}.stock{font-size:10px;color:var(--red);font-weight:800;margin-top:3px}.qty{display:flex;align-items:center;gap:8px}.qty button{width:30px;height:30px;border:1px solid var(--line);border-radius:8px;background:white;font:700 16px Montserrat;cursor:pointer}.qty button:disabled{opacity:.35;cursor:not-allowed}.q{width:18px;text-align:center;font-weight:700}
+label{display:block;margin-top:15px;margin-bottom:6px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--orange)}input,select{width:100%;padding:12px;border:1px solid var(--line);border-radius:9px;background:white;font:500 14px Montserrat;color:var(--text)}.total{display:flex;justify-content:space-between;border-top:2px solid var(--text);margin-top:18px;padding-top:14px;font-weight:800}.total b{font-size:22px;color:var(--navy)}
+button.primary,button.secondary,button.danger{border:0;border-radius:10px;padding:13px 15px;font:700 12px Montserrat;cursor:pointer;margin-top:14px}.primary{width:100%;background:var(--green);color:white}.secondary{background:var(--navy);color:white}.danger{background:var(--red);color:white}.upi{display:none;margin-top:14px;padding:14px;border:1px dashed var(--line);border-radius:12px;font-size:12px;color:var(--muted);line-height:1.5;background:#fffaf3}.upi h3{margin:0 0 5px;font-size:13px;color:var(--text)}.upi p{margin:5px 0}.upi-qr{display:block;width:min(240px,100%);margin:14px auto 10px;border-radius:12px;border:1px solid var(--line);background:#fff}.upi-id{display:flex;align-items:center;justify-content:space-between;gap:8px;background:white;border:1px solid var(--line);padding:9px 10px;border-radius:9px;margin-top:9px;font-size:11px;word-break:break-all}.upi-id button{margin:0;border:0;background:var(--navy);color:#fff;border-radius:7px;padding:7px 9px;font:700 10px Montserrat;cursor:pointer;white-space:nowrap}.upi-help{font-size:10px;margin-top:10px!important}.pay-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--orange);margin-top:12px!important}.confirm{text-align:center;padding:25px 8px}.confirm h2{font-size:21px}.confirm p{font-size:13px;color:var(--muted);line-height:1.6}.actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.actions button{margin-top:8px}.note{font-size:10px;color:var(--muted);text-align:center;margin:18px 5px;line-height:1.5}
+@media(max-width:480px){h1{font-size:24px}.item{grid-template-columns:1fr auto}}
 </style>
 </head>
-<body>
-<div class="wrap">
-  <div class="topbar">
-    <div class="brand">
-      <span class="eyebrow">Order Now</span>
-      <h1>Aly's Dessert</h1>
-      <span class="tagline">Crafted with Love, Served with Sweetness</span>
-    </div>
-  </div>
-
-  <div class="offer-banner">
-    <div class="offer-inner">
-      <div class="offer-text">
-        <p class="ot-title">🇮🇳 80 Years, 80 Rupees — Independence Day Special</p>
-        <p class="ot-sub">15th & 16th August only · Bowl Cakes &amp; Pancakes at ₹80</p>
-      </div>
-      <span class="offer-badge" id="offerBadge">Loading…</span>
-    </div>
-  </div>
-
-  <div class="form-shell" id="formShell">
-    <div id="menuList"></div>
-    <label>Your name</label>
-    <input type="text" id="custName" placeholder="e.g. Riya Sharma">
-    <label>Phone number</label>
-    <input type="tel" id="custPhone" placeholder="e.g. 98765 43210">
-    <label>Room / Flat no.</label>
-    <input type="text" id="custRoom" placeholder="e.g. B-204">
-    <label>Collection date</label>
-    <div id="dateSlots" class="date-slots"></div>
-    <div class="small" id="dateHint">Choose your collection date.</div>
-    <label>Payment mode</label>
-    <select id="payMode">
-      <option>Cash on delivery</option>
-      <option>UPI / GPay</option>
-      <option>Already paid</option>
-    </select>
-    <div class="total-row"><span class="tlabel">Total</span><span class="tval" id="totalVal">₹0</span></div>
-    <button class="submit-btn" id="submitBtn">Send order</button>
-  </div>
-  <div class="addr-note">Gulshan Colony, E/49, 4th Floor, Next to Police Quarter, Versova, Andheri West, Mumbai – 400061</div>
-</div>
-
+<body><main class="wrap">
+<header class="top"><div class="eyebrow">Order Now</div><h1>Aly's Dessert</h1><div class="sub">Crafted with Love, Served with Sweetness</div></header>
+<section class="offer"><h3>🇮🇳 80 Years, 80 Rupees — Independence Day Special</h3><p>15th & 16th August only · Selected Bowl Cakes & Pancakes at ₹80</p><span id="offerBadge" class="badge">Loading offer…</span></section>
+<div id="app"></div>
+<div class="note">Gulshan Colony, E/49, 4th Floor, Next to Police Quarter, Versova, Andheri West, Mumbai – 400061</div>
+</main>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, doc, setDoc, onSnapshot, query, orderBy, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, query, orderBy, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyA_ZgpKwEONBz219iFCSE713nPu1bpnJug",
-  authDomain: "alys-desert.firebaseapp.com",
-  projectId: "alys-desert",
-  storageBucket: "alys-desert.firebasestorage.app",
-  messagingSenderId: "999834394416",
-  appId: "1:999834394416:web:41834966a5e01afda0f2f5"
-};
+const firebaseConfig={apiKey:"AIzaSyA_ZgpKwEONBz219iFCSE713nPu1bpnJug",authDomain:"alys-desert.firebaseapp.com",projectId:"alys-desert",storageBucket:"alys-desert.firebasestorage.app",messagingSenderId:"999834394416",appId:"1:999834394416:web:41834966a5e01afda0f2f5"};
+const db=getFirestore(initializeApp(firebaseConfig));
+const ordersCol=collection(db,"orders"), settingsRef=doc(db,"settings","menu");
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const ordersCol = collection(db, "orders");
+const OFFER_BOWL=[
+{id:"off_bowl_triple",name:"Triple Chocolate Bowl (300ml)",price:80},{id:"off_bowl_milk",name:"Milk Bowl Cake (300ml)",price:80},{id:"off_bowl_white",name:"White Bowl Cake (300ml)",price:80},{id:"off_bowl_dark",name:"Dark Bowl Cake (300ml)",price:80},{id:"off_bowl_double",name:"Double Bowl Cake — Milk & Dark (300ml)",price:80}];
+const OFFER_PANCAKE=[
+{id:"off_pc_triple",name:"Triple Chocolate Pancake (9 pcs)",price:80},{id:"off_pc_milk",name:"Milk Pancake (9 pcs)",price:80},{id:"off_pc_white",name:"White Pancake (9 pcs)",price:80},{id:"off_pc_dark",name:"Dark Pancake (9 pcs)",price:80},{id:"off_pc_double",name:"Double Pancake — Milk & Dark (9 pcs)",price:80}];
+const COMBO=[{id:"combo_mega",name:"Mega Combo — Triple Choc Bowl (500ml) + Chocochip Pancake Bowl",price:200}];
+const REGULAR=[
+{id:"reg_triple",name:"Triple Chocolate (500ml)",price:150},{id:"reg_double",name:"Double Chocolate (500ml)",price:170},{id:"reg_choc",name:"Chocolate (500ml)",price:130},{id:"reg_white",name:"White Chocolate (500ml)",price:170},{id:"reg_dark",name:"Dark Chocolate (500ml)",price:140},{id:"reg_kitkat",name:"KitKat (500ml)",price:170},{id:"reg_biscoff",name:"Biscoff (500ml)",price:200},{id:"reg_biscoffk",name:"Biscoff Kunafa (500ml)",price:230},{id:"reg_pista",name:"Pistachio (500ml)",price:200},{id:"reg_pistak",name:"Pistachio Kunafa (500ml)",price:230},{id:"reg_crunch",name:"Choco Crunch (500ml)",price:200}];
+const ALL=[...OFFER_BOWL,...OFFER_PANCAKE,...COMBO,...REGULAR], OFFER_IDS=new Set([...OFFER_BOWL,...OFFER_PANCAKE].map(x=>x.id));
+let qty=Object.fromEntries(ALL.map(x=>[x.id,0])), outOfStock=new Set(), offerLimit=20, activeOfferOrders=0, dateSlots={"15 August":0,"16 August":0};
+const DATE_LIMIT=20;
 
-const OFFER_LIMIT = 20;
-
-const OFFER_BOWL = [
-  { id:'off_bowl_triple', name:'Triple Chocolate Bowl (300ml)', price:80 },
-  { id:'off_bowl_milk', name:'Milk Bowl Cake (300ml)', price:80 },
-  { id:'off_bowl_white', name:'White Bowl Cake (300ml)', price:80 },
-  { id:'off_bowl_dark', name:'Dark Bowl Cake (300ml)', price:80 },
-  { id:'off_bowl_double', name:'Double Bowl Cake — Milk & Dark (300ml)', price:80 },
-];
-const OFFER_PANCAKE = [
-  { id:'off_pc_triple', name:'Triple Chocolate Pancake (9 pcs)', price:80 },
-  { id:'off_pc_milk', name:'Milk Pancake (9 pcs)', price:80 },
-  { id:'off_pc_white', name:'White Pancake (9 pcs)', price:80 },
-  { id:'off_pc_dark', name:'Dark Pancake (9 pcs)', price:80 },
-  { id:'off_pc_double', name:'Double Pancake — Milk & Dark (9 pcs)', price:80 },
-];
-const COMBO = [
-  { id:'combo_mega', name:'Mega Combo — Triple Choc Bowl (500ml) + Chocochip Pancake Bowl', price:200 },
-];
-const REGULAR_BOWL = [
-  { id:'reg_triple', name:'Triple Chocolate (500ml)', price:150 },
-  { id:'reg_double', name:'Double Chocolate (500ml)', price:170 },
-  { id:'reg_choc', name:'Chocolate (500ml)', price:130 },
-  { id:'reg_white', name:'White Chocolate (500ml)', price:170 },
-  { id:'reg_dark', name:'Dark Chocolate (500ml)', price:140 },
-  { id:'reg_kitkat', name:'KitKat (500ml)', price:170 },
-  { id:'reg_biscoff', name:'Biscoff (500ml)', price:200 },
-  { id:'reg_biscoffk', name:'Biscoff Kunafa (500ml)', price:230 },
-  { id:'reg_pista', name:'Pistachio (500ml)', price:200 },
-  { id:'reg_pistak', name:'Pistachio Kunafa (500ml)', price:230 },
-  { id:'reg_crunch', name:'Choco Crunch (500ml)', price:200 },
-];
-
-const OFFER_IDS = new Set([...OFFER_BOWL, ...OFFER_PANCAKE].map(m => m.id));
-const ALL_ITEMS = [...OFFER_BOWL, ...OFFER_PANCAKE, ...COMBO, ...REGULAR_BOWL];
-
-let qty = {};
-ALL_ITEMS.forEach(m => qty[m.id] = 0);
-let offerSlotsUsed = 0;
-let offerSoldOut = false;
-const DATE_LIMIT = 20;
-const COLLECTION_DATES = ['15th August','16th August'];
-let dateSlotsUsed = {'15th August':0,'16th August':0};
-let selectedCollectionDate = '';
-let latestOrders = [];
-
-function section(title, priceTag, items, disabled){
-  return `<div class="section-label">${title}${priceTag ? `<span class="price-tag">${priceTag}</span>` : ''}</div>` +
-    items.map(m => `
-      <div class="menu-item ${disabled ? 'disabled' : ''}">
-        <div><div class="mi-name">${m.name}</div><div class="mi-price">₹${m.price}</div></div>
-        <div class="qty-stepper">
-          <button data-id="${m.id}" data-d="-1" ${disabled ? 'disabled' : ''}>−</button>
-          <span class="qval" id="q-${m.id}">${qty[m.id]}</span>
-          <button data-id="${m.id}" data-d="1" ${disabled ? 'disabled' : ''}>+</button>
-        </div>
-      </div>`).join('');
+function cleanPhone(v){let d=v.replace(/\D/g,"");return d.length===10?"91"+d:d}
+function slotText(date){
+ const left=Math.max(0,DATE_LIMIT-(dateSlots[date]||0));
+ return left>0 ? `${left} slot${left===1?"":"s"} left` : "FULL";
 }
-
-function renderMenu(){
-  const el = document.getElementById('menuList');
-  el.innerHTML =
-    section('🎉 Independence Day — Bowl Cakes', '₹80 each', OFFER_BOWL, offerSoldOut) +
-    section('🎉 Independence Day — Pancakes', '₹80 each', OFFER_PANCAKE, offerSoldOut) +
-    section('Mega Combo', '₹200', COMBO, false) +
-    section('Bowl Cake — Regular (500ml)', null, REGULAR_BOWL, false);
-
-  el.querySelectorAll('button').forEach(b => {
-    b.addEventListener('click', () => {
-      const id = b.dataset.id, d = parseInt(b.dataset.d);
-      qty[id] = Math.max(0, qty[id] + d);
-      document.getElementById('q-'+id).textContent = qty[id];
-      updateTotal();
-    });
-  });
-
-  const badge = document.getElementById('offerBadge');
-  if(offerSoldOut){ badge.textContent = 'Offer sold out'; badge.classList.add('sold-out'); }
-  else { badge.textContent = (OFFER_LIMIT - offerSlotsUsed) + ' offer slots left'; badge.classList.remove('sold-out'); }
+function dateSelector(){
+ const dates=["15 August","16 August"];
+ return `<label>Collection date</label>
+ <select id="collectionDate">
+   <option value="">Select collection date</option>
+   ${dates.map(d=>`<option value="${d}" ${(dateSlots[d]||0)>=DATE_LIMIT?"disabled":""}>${d} — ${slotText(d)}</option>`).join("")}
+ </select>
+ <div style="font-size:11px;color:var(--muted);margin-top:7px">Choose your preferred collection date. A date cannot be ordered once all its 20 slots are filled.</div>`;
 }
-
-function renderDateSlots(){
-  const el=document.getElementById('dateSlots');
-  el.innerHTML=COLLECTION_DATES.map(date=>{
-    const left=Math.max(0,DATE_LIMIT-(dateSlotsUsed[date]||0));
-    const full=left<=0;
-    return `<button type="button" class="date-slot ${selectedCollectionDate===date?'selected':''} ${full?'full':''}" data-date="${date}" ${full?'disabled':''}><b>📅 ${date}</b><span>${full?'Fully booked':left+' slot'+(left===1?'':'s')+' left'}</span></button>`;
-  }).join('');
-  el.querySelectorAll('[data-date]').forEach(b=>b.addEventListener('click',()=>{
-    selectedCollectionDate=b.dataset.date;
-    document.getElementById('dateHint').textContent=`Collection date selected: ${selectedCollectionDate}`;
-    renderDateSlots();
-  }));
+function menuSection(title,items){return `<div class="section"><div class="section-title">${title}</div>${items.map(m=>{let off=outOfStock.has(m.id);return `<div class="item"><div><div class="name">${m.name}</div><div class="price">₹${m.price}</div>${off?'<div class="stock">OUT OF STOCK</div>':''}</div><div class="qty"><button data-id="${m.id}" data-d="-1" ${off?'disabled':''}>−</button><span class="q" id="q-${m.id}">${qty[m.id]}</span><button data-id="${m.id}" data-d="1" ${off?'disabled':''}>+</button></div></div>`}).join("")}</div>`}
+function total(){return ALL.reduce((s,m)=>s+qty[m.id]*m.price,0)}
+function bindQty(){document.querySelectorAll("[data-id]").forEach(b=>b.onclick=()=>{let id=b.dataset.id,d=+b.dataset.d;qty[id]=Math.max(0,qty[id]+d);renderForm()})}
+function paymentBox(){
+ return `<div class="upi" id="upiBox">
+   <h3>Pay via UPI / GPay</h3>
+   <p><b>📷 Scan this QR code</b> using GPay, PhonePe, Paytm, or any UPI app.</p>
+   <p>You can also <b>save the QR image to your gallery</b> and use your UPI app's Scan from Gallery option.</p>
+   <img class="upi-qr" src="payment-qr.jpeg" alt="Aly's Dessert UPI payment QR code">
+   <p class="pay-label">UPI ID</p>
+   <div class="upi-id"><span>khizarchoudhary786-1@oksbi</span><button type="button" id="copyUpi">Copy</button></div>
+   <p class="pay-label">GPay / PhonePe number</p>
+   <div class="upi-id"><span>9821285885</span><button type="button" id="copyPhone">Copy</button></div>
+   <p class="upi-help">After payment, return here and tap <b>Send order</b>. The kitchen team will verify the payment.</p>
+ </div>`;
 }
-
-function updateTotal(){
-  let total = 0;
-  ALL_ITEMS.forEach(m => total += qty[m.id]*m.price);
-  document.getElementById('totalVal').textContent = '₹'+total;
-}
-
-renderMenu();
-renderDateSlots();
-
-const q = query(ordersCol, orderBy("time", "desc"));
-onSnapshot(q, (snapshot) => {
-  const orders = snapshot.docs.map(d => d.data());
-  latestOrders = orders;
-  // Existing offer orders from before this update are treated as 15th August bookings.
-  const booked = orders.filter(o => o.status !== 'cancelled');
-  offerSlotsUsed = booked.filter(o => o.hasOffer).length;
-  offerSoldOut = offerSlotsUsed >= OFFER_LIMIT;
-  dateSlotsUsed = {'15th August':0,'16th August':0};
-  booked.forEach(o=>{
-    const date=o.collectionDate || (o.hasOffer ? '15th August' : '');
-    if(dateSlotsUsed.hasOwnProperty(date)) dateSlotsUsed[date]++;
-  });
-  if(selectedCollectionDate && dateSlotsUsed[selectedCollectionDate] >= DATE_LIMIT){
-    selectedCollectionDate='';
-    document.getElementById('dateHint').textContent='That date is now fully booked. Please choose another date.';
-  }
-  renderMenu();
-  renderDateSlots();
-});
-
-function cleanPhone(raw){
-  let digits = raw.replace(/\D/g, '');
-  if(digits.length === 10) digits = '91' + digits;
-  return digits;
-}
-
-async function submitOrder(){
-  const name = document.getElementById('custName').value.trim();
-  const phoneRaw = document.getElementById('custPhone').value.trim();
-  const room = document.getElementById('custRoom').value.trim();
-  const pay = document.getElementById('payMode').value;
-  const items = ALL_ITEMS.filter(m => qty[m.id] > 0).map(m => ({name:m.name, qty:qty[m.id], price:m.price, offer:OFFER_IDS.has(m.id)}));
-
-  if(!name || !room){ alert('Please fill in name and room number.'); return; }
-  if(!phoneRaw || phoneRaw.replace(/\D/g,'').length < 10){ alert('Please enter a valid phone number.'); return; }
-  if(items.length === 0){ alert('Please select at least one item.'); return; }
-  if(!selectedCollectionDate){ alert('Please choose a collection date before sending your order.'); return; }
-  if((dateSlotsUsed[selectedCollectionDate]||0) >= DATE_LIMIT){ alert(`${selectedCollectionDate} is fully booked. Please select the other available date.`); selectedCollectionDate=''; renderDateSlots(); return; }
-
-  const total = items.reduce((s,i)=>s+i.qty*i.price,0);
-  const hasOffer = items.some(i => i.offer);
-  const phone = cleanPhone(phoneRaw);
-
-  const btn = document.getElementById('submitBtn');
-  btn.disabled = true; btn.textContent = 'Sending...';
-
-  if(hasOffer && offerSoldOut){
-    alert('Sorry, the 20 offer slots just got claimed! Please remove the ₹80 items and resubmit.');
-    btn.disabled = false; btn.textContent = 'Send order';
-    return;
-  }
-
-  const id = 'ord_' + Date.now() + '_' + Math.floor(Math.random()*1000);
-  const order = { id, name, phone, room, items, total, pay, hasOffer, collectionDate:selectedCollectionDate, status:'new', time:new Date().toISOString() };
-
+function copyText(value,buttonId){
+ document.getElementById(buttonId)?.addEventListener("click",async()=>{
   try{
-    // Transaction re-checks the chosen date at save time so two customers cannot claim the same final slot together.
-    await runTransaction(db, async tx=>{
-      const snap=await tx.get(ordersCol);
-      let used=0;
-      snap.docs.forEach(d=>{
-        const existing=d.data();
-        if(existing.status==='cancelled') return;
-        const date=existing.collectionDate || (existing.hasOffer ? '15th August' : '');
-        if(date===selectedCollectionDate) used++;
-      });
-      if(used>=DATE_LIMIT) throw new Error('DATE_FULL');
-      tx.set(doc(db, "orders", id), order);
+   await navigator.clipboard.writeText(value);
+   const b=document.getElementById(buttonId);
+   if(b){b.textContent="Copied";setTimeout(()=>b.textContent="Copy",1400);}
+  }catch(e){prompt("Copy this:",value);}
+ });
+}
+function renderForm(){
+ const app=document.getElementById("app");
+ const amount=total();
+ app.innerHTML=`<div class="card">${menuSection("Offer Bowl Cakes — ₹80",OFFER_BOWL)}${menuSection("Offer Pancakes — ₹80",OFFER_PANCAKE)}${menuSection("Combo",COMBO)}${menuSection("Regular Menu",REGULAR)}
+ <label>Your name</label><input id="name" placeholder="e.g. Riya Sharma">
+ <label>Phone number</label><input id="phone" type="tel" placeholder="e.g. 98765 43210">
+ <label>Room / Flat no.</label><input id="room" placeholder="e.g. B-204">
+ ${dateSelector()}<label>Payment mode</label><select id="pay"><option>Cash on delivery</option><option>UPI / GPay</option></select>
+ <div class="total"><span>Total</span><b>₹${amount}</b></div>
+ ${paymentBox()}
+ <button id="submit" class="primary">Send order</button></div>`;
+ bindQty();
+ const pay=document.getElementById("pay"), upiBox=document.getElementById("upiBox");
+ const toggleUpi=()=>upiBox.style.display=pay.value==="UPI / GPay"?"block":"none";
+ pay.onchange=toggleUpi;
+ toggleUpi();
+ copyText("khizarchoudhary786-1@oksbi","copyUpi");
+ copyText("9821285885","copyPhone");
+ document.getElementById("submit").onclick=submitOrder;
+}
+function confirmView(o){
+ return `<div class="card confirm"><div>✓ ORDER RECEIVED</div><h2>Thank you, ${o.name}!</h2><p>Your order has been sent to the kitchen.</p><div class="actions"><button class="secondary" id="newBtn">Place another order</button></div></div>`;
+}
+function showConfirm(order){
+ document.getElementById("app").innerHTML=confirmView(order);
+ document.getElementById("newBtn").addEventListener("click",()=>{qty=Object.fromEntries(ALL.map(x=>[x.id,0]));renderForm()});
+}
+async function submitOrder(){
+  const name=document.getElementById("name").value.trim(),
+        phoneRaw=document.getElementById("phone").value.trim(),
+        room=document.getElementById("room").value.trim(),
+        collectionDate=document.getElementById("collectionDate").value,
+        pay=document.getElementById("pay").value;
+  const items=ALL.filter(m=>qty[m.id]>0).map(m=>({id:m.id,name:m.name,qty:qty[m.id],price:m.price,offer:OFFER_IDS.has(m.id)}));
+  if(!name||!room||phoneRaw.replace(/\D/g,"").length<10||!items.length||!collectionDate){
+    alert("Please enter name, valid phone, room number, select a collection date and choose at least one product.");return;
+  }
+  if((dateSlots[collectionDate]||0)>=DATE_LIMIT){
+    alert(`${collectionDate} is fully booked. Please select the other available date.`);return;
+  }
+  const btn=document.getElementById("submit");btn.disabled=true;btn.textContent="Sending...";
+  const phone=cleanPhone(phoneRaw), now=Date.now(), amount=items.reduce((s,i)=>s+i.qty*i.price,0);
+  const order={id:"ord_"+now+"_"+Math.floor(Math.random()*1000),name,phone,room,items,total:amount,pay,hasOffer:items.some(x=>x.offer),status:"new",paymentStatus:pay==="Cash on delivery"?"COD":"pending",collectionDate,time:new Date().toISOString()};
+  try{
+    await runTransaction(db, async(transaction)=>{
+      const snap=await transaction.get(query(ordersCol,orderBy("time","desc")));
+      const current=snap.docs.map(x=>x.data()).filter(o=>o.status==="new" && o.collectionDate===collectionDate).length;
+      if(current>=DATE_LIMIT) throw new Error("DATE_FULL");
+      transaction.set(doc(db,"orders",order.id),order);
     });
     showConfirm(order);
   }catch(e){
-    if(e.message==='DATE_FULL') alert(`${selectedCollectionDate} has just become fully booked. Please choose the other available date.`);
-    else alert('Could not send order — check your internet connection and try again.');
-    btn.disabled = false; btn.textContent = 'Send order';
+    console.error(e);
+    if(e.message==="DATE_FULL") alert(`${collectionDate} has just become fully booked. Please select the other available date.`);
+    else alert("Could not save the order. Check internet/Firebase rules.");
+    btn.disabled=false;btn.textContent="Send order";
   }
 }
-
-function showConfirm(order){
-  document.getElementById('formShell').innerHTML = `
-    <div class="confirm">
-      <div class="stamp">✓ Order received</div>
-      <p>Thanks ${order.name}! Your order has been received successfully and sent straight to the kitchen.</p><p><strong>📅 Collection Date: ${order.collectionDate}</strong></p><p>Our team will confirm your order on WhatsApp. Please do not place the same order again.</p>
-      <button id="newOrderBtn">Place another order</button>
-    </div>`;
-  document.getElementById('newOrderBtn').addEventListener('click', () => location.reload());
-}
-document.getElementById('submitBtn').addEventListener('click', submitOrder);
-</script>
-</body>
-</html>
+onSnapshot(settingsRef,s=>{let d=s.exists()?s.data():{};outOfStock=new Set(d.outOfStock||[]);offerLimit=Number(d.offerLimit||20);renderForm()});
+onSnapshot(query(ordersCol,orderBy("time","desc")),s=>{
+ let orders=s.docs.map(x=>x.data());
+ activeOfferOrders=orders.filter(o=>o.hasOffer&&o.status==="new").length;
+ let left=Math.max(0,offerLimit-activeOfferOrders);
+ document.getElementById("offerBadge").textContent=`${left} offer slot${left===1?"":"s"} left`;
+ dateSlots={"15 August":0,"16 August":0};
+ orders.forEach(o=>{
+   // Existing orders created before collection dates existed are current
+   // 15 August orders for slot counting only. No Firebase data is changed.
+   if(o.collectionDate && dateSlots[o.collectionDate]!==undefined){
+     if(o.status==="new") dateSlots[o.collectionDate]++;
+   } else if(!o.collectionDate && o.status==="new"){
+     dateSlots["15 August"]++;
+   }
+ });
+ const select=document.getElementById("collectionDate");
+ if(select){
+   const current=select.value;
+   ["15 August","16 August"].forEach(d=>{
+     const opt=[...select.options].find(o=>o.value===d);
+     if(opt){opt.textContent=`${d} — ${slotText(d)}`;opt.disabled=(dateSlots[d]||0)>=DATE_LIMIT;}
+   });
+   if(current) select.value=current;
+ }
+});
+renderForm();
+</script></body></html>
