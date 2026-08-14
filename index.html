@@ -43,7 +43,14 @@ let qty=Object.fromEntries(ALL.map(x=>[x.id,0])), outOfStock=new Set(), offerLim
 const DATE_LIMIT=20;
 
 function cleanPhone(v){let d=v.replace(/\D/g,"");return d.length===10?"91"+d:d}
+function remainingOfferSlots(){
+ return Math.max(0,offerLimit-activeOfferOrders);
+}
 function slotText(date){
+ if(date==="15 August"){
+   const left=remainingOfferSlots();
+   return left>0 ? `${left} slot${left===1?"":"s"} left` : "FULL";
+ }
  const left=Math.max(0,DATE_LIMIT-(dateSlots[date]||0));
  return left>0 ? `${left} slot${left===1?"":"s"} left` : "FULL";
 }
@@ -113,8 +120,14 @@ async function submitOrder(){
   const items=ALL.filter(m=>qty[m.id]>0).map(m=>({id:m.id,name:m.name,qty:qty[m.id],price:m.price,offer:OFFER_IDS.has(m.id)}));
   if(!name||!room||phoneRaw.replace(/\D/g,"").length<10||!items.length||!collectionDate){alert("Please enter name, valid phone, room number, select a collection date and choose at least one product.");return;}
   const hasOffer=items.some(x=>x.offer);
-  if((dateSlots[collectionDate]||0)>=DATE_LIMIT){alert(`${collectionDate} is fully booked. Please select the other available date.`);return;}
-  if(hasOffer&&activeOfferOrders>=offerLimit){alert("The Independence Day offer is fully booked. Please choose a regular menu item.");return;}
+  if(collectionDate==="15 August" && remainingOfferSlots()<=0){
+    alert("15 August is fully booked. Please select 16 August.");
+    return;
+  }
+  if(collectionDate==="16 August" && (dateSlots["16 August"]||0)>=DATE_LIMIT){
+    alert("16 August is fully booked.");
+    return;
+  }
   const btn=document.getElementById("submit");btn.disabled=true;btn.textContent="Sending...";
   const phone=cleanPhone(phoneRaw),now=Date.now(),amount=items.reduce((s,i)=>s+i.qty*i.price,0);
   const order={id:"ord_"+now+"_"+Math.floor(Math.random()*1000),name,phone,room,items,total:amount,pay,hasOffer,status:"new",paymentStatus:pay==="Cash on delivery"?"COD":"pending",collectionDate,time:new Date().toISOString()};
@@ -125,8 +138,8 @@ onSnapshot(settingsRef,s=>{let d=s.exists()?s.data():{};outOfStock=new Set(d.out
 onSnapshot(query(ordersCol,orderBy("time","desc")),s=>{
  let orders=s.docs.map(x=>x.data());
  activeOfferOrders=orders.filter(o=>o.hasOffer&&o.status==="new").length;
- let left=Math.max(0,offerLimit-activeOfferOrders);
- document.getElementById("offerBadge").textContent=`${left} offer slot${left===1?"":"s"} left`;
+ let left=remainingOfferSlots();
+  document.getElementById("offerBadge").textContent=`${left} offer slot${left===1?"":"s"} left`;
  dateSlots={"15 August":0,"16 August":0};
  orders.forEach(o=>{
    // Existing orders created before collection dates existed are current
@@ -142,7 +155,12 @@ onSnapshot(query(ordersCol,orderBy("time","desc")),s=>{
    const current=select.value;
    ["15 August","16 August"].forEach(d=>{
      const opt=[...select.options].find(o=>o.value===d);
-     if(opt){opt.textContent=`${d} — ${slotText(d)}`;opt.disabled=(dateSlots[d]||0)>=DATE_LIMIT;}
+     if(opt){
+        opt.textContent=`${d} — ${slotText(d)}`;
+        opt.disabled=(d==="15 August")
+          ? remainingOfferSlots()<=0
+          : (dateSlots["16 August"]||0)>=DATE_LIMIT;
+      }
    });
    if(current) select.value=current;
  }
