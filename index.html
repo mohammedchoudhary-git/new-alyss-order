@@ -39,27 +39,26 @@ const COMBO=[{id:"combo_mega",name:"Mega Combo — Triple Choc Bowl (500ml) + Ch
 const REGULAR=[
 {id:"reg_triple",name:"Triple Chocolate (500ml)",price:150},{id:"reg_double",name:"Double Chocolate (500ml)",price:170},{id:"reg_choc",name:"Chocolate (500ml)",price:130},{id:"reg_white",name:"White Chocolate (500ml)",price:170},{id:"reg_dark",name:"Dark Chocolate (500ml)",price:140},{id:"reg_kitkat",name:"KitKat (500ml)",price:170},{id:"reg_biscoff",name:"Biscoff (500ml)",price:200},{id:"reg_biscoffk",name:"Biscoff Kunafa (500ml)",price:230},{id:"reg_pista",name:"Pistachio (500ml)",price:200},{id:"reg_pistak",name:"Pistachio Kunafa (500ml)",price:230},{id:"reg_crunch",name:"Choco Crunch (500ml)",price:200}];
 const ALL=[...OFFER_BOWL,...OFFER_PANCAKE,...COMBO,...REGULAR], OFFER_IDS=new Set([...OFFER_BOWL,...OFFER_PANCAKE].map(x=>x.id));
-let qty=Object.fromEntries(ALL.map(x=>[x.id,0])), outOfStock=new Set(), offerLimit=20, activeOfferOrders=0, dateSlots={"15 August":0,"16 August":0};
+let qty=Object.fromEntries(ALL.map(x=>[x.id,0])), outOfStock=new Set(), dateSlots={"15 August":0,"16 August":0};
 const DATE_LIMIT=20;
+const CLOSED_DATES=new Set(["15 August"]);
+const ACTIVE_OFFER_DATE="16 August";
 
 function cleanPhone(v){let d=v.replace(/\D/g,"");return d.length===10?"91"+d:d}
-function remainingOfferSlots(){
- return Math.max(0,offerLimit-activeOfferOrders);
+function remainingSlots(date){
+ return Math.max(0,DATE_LIMIT-(dateSlots[date]||0));
 }
 function slotText(date){
- if(date==="15 August"){
-   const left=remainingOfferSlots();
-   return left>0 ? `${left} slot${left===1?"":"s"} left` : "FULL";
- }
- const left=Math.max(0,DATE_LIMIT-(dateSlots[date]||0));
- return left>0 ? `${left} slot${left===1?"":"s"} left` : "FULL";
+ if(CLOSED_DATES.has(date) || remainingSlots(date)<=0) return "FULL";
+ const left=remainingSlots(date);
+ return `${left} slot${left===1?"":"s"} left`;
 }
 function dateSelector(){
  const dates=["15 August","16 August"];
  return `<label>Collection date</label>
  <select id="collectionDate">
    <option value="">Select collection date</option>
-   ${dates.map(d=>`<option value="${d}" ${(dateSlots[d]||0)>=DATE_LIMIT?"disabled":""}>${d} — ${slotText(d)}</option>`).join("")}
+   ${dates.map(d=>`<option value="${d}" ${(CLOSED_DATES.has(d)||remainingSlots(d)<=0)?"disabled":""}>${d} — ${slotText(d)}</option>`).join("")}
  </select>
  <div style="font-size:11px;color:var(--muted);margin-top:7px">Choose your preferred collection date. A date cannot be ordered once all its 20 slots are filled.</div>`;
 }
@@ -120,12 +119,8 @@ async function submitOrder(){
   const items=ALL.filter(m=>qty[m.id]>0).map(m=>({id:m.id,name:m.name,qty:qty[m.id],price:m.price,offer:OFFER_IDS.has(m.id)}));
   if(!name||!room||phoneRaw.replace(/\D/g,"").length<10||!items.length||!collectionDate){alert("Please enter name, valid phone, room number, select a collection date and choose at least one product.");return;}
   const hasOffer=items.some(x=>x.offer);
-  if(collectionDate==="15 August" && remainingOfferSlots()<=0){
-    alert("15 August is fully booked. Please select 16 August.");
-    return;
-  }
-  if(collectionDate==="16 August" && (dateSlots["16 August"]||0)>=DATE_LIMIT){
-    alert("16 August is fully booked.");
+  if(CLOSED_DATES.has(collectionDate) || remainingSlots(collectionDate)<=0){
+    alert(`${collectionDate} is fully booked. Please select another available date.`);
     return;
   }
   const btn=document.getElementById("submit");btn.disabled=true;btn.textContent="Sending...";
@@ -134,35 +129,32 @@ async function submitOrder(){
   try{await setDoc(doc(db,"orders",order.id),order);showConfirm(order);}
   catch(e){console.error(e);alert("Could not save the order. Please try again.");btn.disabled=false;btn.textContent="Send order";}
 }
-onSnapshot(settingsRef,s=>{let d=s.exists()?s.data():{};outOfStock=new Set(d.outOfStock||[]);offerLimit=Number(d.offerLimit||20);renderForm()});
+onSnapshot(settingsRef,s=>{let d=s.exists()?s.data():{};outOfStock=new Set(d.outOfStock||[]);renderForm()});
 onSnapshot(query(ordersCol,orderBy("time","desc")),s=>{
  let orders=s.docs.map(x=>x.data());
- activeOfferOrders=orders.filter(o=>o.hasOffer&&o.status==="new").length;
- let left=remainingOfferSlots();
-  document.getElementById("offerBadge").textContent=`${left} offer slot${left===1?"":"s"} left`;
  dateSlots={"15 August":0,"16 August":0};
  orders.forEach(o=>{
-   // Existing orders created before collection dates existed are current
-   // 15 August orders for slot counting only. No Firebase data is changed.
+   // Existing orders without a collection date remain untouched in Firebase.
+   // For display/counting only, legacy active orders are treated as 15 August.
    if(o.collectionDate && dateSlots[o.collectionDate]!==undefined){
      if(o.status==="new") dateSlots[o.collectionDate]++;
    } else if(!o.collectionDate && o.status==="new"){
      dateSlots["15 August"]++;
    }
  });
+ const offerLeft=remainingSlots(ACTIVE_OFFER_DATE);
+ document.getElementById("offerBadge").textContent=`${offerLeft} offer slot${offerLeft===1?"":"s"} left`;
  const select=document.getElementById("collectionDate");
  if(select){
    const current=select.value;
    ["15 August","16 August"].forEach(d=>{
      const opt=[...select.options].find(o=>o.value===d);
      if(opt){
-        opt.textContent=`${d} — ${slotText(d)}`;
-        opt.disabled=(d==="15 August")
-          ? remainingOfferSlots()<=0
-          : (dateSlots["16 August"]||0)>=DATE_LIMIT;
-      }
+       opt.textContent=`${d} — ${slotText(d)}`;
+       opt.disabled=CLOSED_DATES.has(d)||remainingSlots(d)<=0;
+     }
    });
-   if(current) select.value=current;
+   if(current && !select.querySelector(`option[value="${current}"]`)?.disabled) select.value=current;
  }
 });
 renderForm();
