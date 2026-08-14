@@ -25,7 +25,7 @@ button.primary,button.secondary,button.danger{border:0;border-radius:10px;paddin
 </main>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, query, orderBy, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig={apiKey:"AIzaSyA_ZgpKwEONBz219iFCSE713nPu1bpnJug",authDomain:"alys-desert.firebaseapp.com",projectId:"alys-desert",storageBucket:"alys-desert.firebasestorage.app",messagingSenderId:"999834394416",appId:"1:999834394416:web:41834966a5e01afda0f2f5"};
 const db=getFirestore(initializeApp(firebaseConfig));
@@ -102,42 +102,24 @@ function renderForm(){
  document.getElementById("submit").onclick=submitOrder;
 }
 function confirmView(o){
- return `<div class="card confirm"><div>✓ ORDER RECEIVED</div><h2>Thank you, ${o.name}!</h2><p>Your order has been sent to the kitchen.</p><div class="actions"><button class="secondary" id="newBtn">Place another order</button></div></div>`;
+ return `<div class="card confirm"><div>✓ ORDER RECEIVED</div><h2>Thank you, ${o.name}!</h2><p>Your order has been sent to the kitchen.</p><p><b>Collection Date: ${o.collectionDate}</b></p><div class="actions"><button class="secondary" id="newBtn">Place another order</button></div></div>`;
 }
 function showConfirm(order){
  document.getElementById("app").innerHTML=confirmView(order);
  document.getElementById("newBtn").addEventListener("click",()=>{qty=Object.fromEntries(ALL.map(x=>[x.id,0]));renderForm()});
 }
 async function submitOrder(){
-  const name=document.getElementById("name").value.trim(),
-        phoneRaw=document.getElementById("phone").value.trim(),
-        room=document.getElementById("room").value.trim(),
-        collectionDate=document.getElementById("collectionDate").value,
-        pay=document.getElementById("pay").value;
+  const name=document.getElementById("name").value.trim(),phoneRaw=document.getElementById("phone").value.trim(),room=document.getElementById("room").value.trim(),collectionDate=document.getElementById("collectionDate").value,pay=document.getElementById("pay").value;
   const items=ALL.filter(m=>qty[m.id]>0).map(m=>({id:m.id,name:m.name,qty:qty[m.id],price:m.price,offer:OFFER_IDS.has(m.id)}));
-  if(!name||!room||phoneRaw.replace(/\D/g,"").length<10||!items.length||!collectionDate){
-    alert("Please enter name, valid phone, room number, select a collection date and choose at least one product.");return;
-  }
-  if((dateSlots[collectionDate]||0)>=DATE_LIMIT){
-    alert(`${collectionDate} is fully booked. Please select the other available date.`);return;
-  }
+  if(!name||!room||phoneRaw.replace(/\D/g,"").length<10||!items.length||!collectionDate){alert("Please enter name, valid phone, room number, select a collection date and choose at least one product.");return;}
+  const hasOffer=items.some(x=>x.offer);
+  if((dateSlots[collectionDate]||0)>=DATE_LIMIT){alert(`${collectionDate} is fully booked. Please select the other available date.`);return;}
+  if(hasOffer&&activeOfferOrders>=offerLimit){alert("The Independence Day offer is fully booked. Please choose a regular menu item.");return;}
   const btn=document.getElementById("submit");btn.disabled=true;btn.textContent="Sending...";
-  const phone=cleanPhone(phoneRaw), now=Date.now(), amount=items.reduce((s,i)=>s+i.qty*i.price,0);
-  const order={id:"ord_"+now+"_"+Math.floor(Math.random()*1000),name,phone,room,items,total:amount,pay,hasOffer:items.some(x=>x.offer),status:"new",paymentStatus:pay==="Cash on delivery"?"COD":"pending",collectionDate,time:new Date().toISOString()};
-  try{
-    await runTransaction(db, async(transaction)=>{
-      const snap=await transaction.get(query(ordersCol,orderBy("time","desc")));
-      const current=snap.docs.map(x=>x.data()).filter(o=>o.status==="new" && o.collectionDate===collectionDate).length;
-      if(current>=DATE_LIMIT) throw new Error("DATE_FULL");
-      transaction.set(doc(db,"orders",order.id),order);
-    });
-    showConfirm(order);
-  }catch(e){
-    console.error(e);
-    if(e.message==="DATE_FULL") alert(`${collectionDate} has just become fully booked. Please select the other available date.`);
-    else alert("Could not save the order. Check internet/Firebase rules.");
-    btn.disabled=false;btn.textContent="Send order";
-  }
+  const phone=cleanPhone(phoneRaw),now=Date.now(),amount=items.reduce((s,i)=>s+i.qty*i.price,0);
+  const order={id:"ord_"+now+"_"+Math.floor(Math.random()*1000),name,phone,room,items,total:amount,pay,hasOffer,status:"new",paymentStatus:pay==="Cash on delivery"?"COD":"pending",collectionDate,time:new Date().toISOString()};
+  try{await setDoc(doc(db,"orders",order.id),order);showConfirm(order);}
+  catch(e){console.error(e);alert("Could not save the order. Please try again.");btn.disabled=false;btn.textContent="Send order";}
 }
 onSnapshot(settingsRef,s=>{let d=s.exists()?s.data():{};outOfStock=new Set(d.outOfStock||[]);offerLimit=Number(d.offerLimit||20);renderForm()});
 onSnapshot(query(ordersCol,orderBy("time","desc")),s=>{

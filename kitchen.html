@@ -73,11 +73,13 @@ function render(){
 
 Your order has been confirmed successfully!
 
-📅 Collection Date: ${o.collectionDate || (o.hasOffer?'15th August':'Not selected')}
+Collection Date: ${o.collectionDate || (o.hasOffer?'15th August':'Not selected')}
 
-Thank you for ordering from Aly's Dessert. Please be patient while we prepare your order. 😊
+Thank you for ordering from Aly's Dessert. Please be patient for your order. 😊
 
-We will message you again when your order is ready for collection.`;openWhatsApp(o.phone,msg)});
+We will message you again when your order is ready for collection.
+
+Happy Independence Day 🇮🇳`;openWhatsApp(o.phone,msg)});
  document.querySelectorAll("[data-ready]").forEach(b=>b.onclick=()=>{const o=latest.find(x=>x.id===b.dataset.ready);if(!o)return;const msg=`Hello ${o.name} 👋
 
 Your order is complete! 🎉
