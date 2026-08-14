@@ -54,13 +54,37 @@ function renderPreparation(active){
  document.getElementById("comboSummary").innerHTML=megaCombo?`<div class="combo-box"><div class="small">Total pending Mega Combos</div><div class="combo-total">Mega Combo ×${megaCombo}</div><div class="summary-grid"><div class="summary-item"><span>Triple Chocolate Bowl</span><b>×${megaCombo}</b></div><div class="summary-item"><span>Chocochip Pancake Bowl</span><b>×${megaCombo}</b></div></div></div>`:`<div class="small">No pending Mega Combo orders.</div>`;
 }
 function loyalty(phone){return latest.filter(o=>o.phone===phone&&o.status!=="cancelled").length}
+function formatCollectionDate(o){return o.collectionDate || (o.hasOffer ? '15th August (existing order)' : 'Not selected');}
+function openWhatsApp(phone,message){
+  const digits=String(phone||'').replace(/\D/g,'');
+  const number=digits.length===10?'91'+digits:digits;
+  if(!number){ alert('Customer phone number is missing.'); return; }
+  window.open('https://wa.me/'+number+'?text='+encodeURIComponent(message),'_blank');
+}
+
 function render(){
  const active=latest.filter(o=>o.status==="new"), done=latest.filter(o=>o.status==="done"), offerPending=active.filter(o=>o.hasOffer).length, limit=Number(settings.offerLimit||20), shown=hideCompleted?latest.filter(o=>o.status!=="done"):latest;
  document.getElementById("count").textContent=latest.length;document.getElementById("sales").textContent="₹"+latest.filter(o=>o.status!=="cancelled").reduce((s,o)=>s+(Number(o.total)||0),0);document.getElementById("pending").textContent=active.length;document.getElementById("done").textContent=done.length;document.getElementById("offerPending").textContent=offerPending;document.getElementById("offerLeft").textContent=Math.max(0,limit-offerPending);document.getElementById("limitText").textContent=`Current offer limit: ${limit}`;
  renderStock();
  renderPreparation(active);
- document.getElementById("orders").innerHTML=shown.length?shown.map(o=>{let payClass=o.paymentStatus==="paid"?"paid":o.paymentStatus==="pending"?"pending":"";return `<article class="ticket ${o.status}"><div class="row"><div><div class="name">${esc(o.name)} ${o.hasOffer?'<span class="status">OFFER</span>':""}</div><div class="meta">Room ${esc(o.room)} · 📱 ${esc(o.phone)} · Loyalty: ${loyalty(o.phone)} order(s)</div></div><div class="small">${o.time?new Date(o.time).toLocaleString():""}</div></div><div>${(o.items||[]).map(i=>`<div class="item"><span>${esc(i.name)}</span><b>×${i.qty}</b></div>`).join("")}</div><div class="ticket-actions"><button class="muted">${esc(o.pay||"Payment")} · ₹${o.total}</button><button data-paid="${o.id}" class="${o.paymentStatus==="paid"?"primary":"secondary"}">${o.paymentStatus==="paid"?"Paid":"Mark paid"}</button><button data-status="${o.id}" data-next="${o.status==="done"?"new":"done"}" class="primary">${o.status==="done"?"Undo done":"Mark done"}</button><button data-reject="${o.id}" class="danger">Reject / Cancel</button><button data-delete="${o.id}" class="danger">Delete DB</button></div></article>`}).join(""):`<div class="panel empty">No orders to show.</div>`;
+ document.getElementById("orders").innerHTML=shown.length?shown.map(o=>{let payClass=o.paymentStatus==="paid"?"paid":o.paymentStatus==="pending"?"pending":"";return `<article class="ticket ${o.status}"><div class="row"><div><div class="name">${esc(o.name)} ${o.hasOffer?'<span class="status">OFFER</span>':""}</div><div class="meta">Room ${esc(o.room)} · 📱 ${esc(o.phone)} · Loyalty: ${loyalty(o.phone)} order(s) · 📅 ${esc(formatCollectionDate(o))}</div></div><div class="small">${o.time?new Date(o.time).toLocaleString():""}</div></div><div>${(o.items||[]).map(i=>`<div class="item"><span>${esc(i.name)}</span><b>×${i.qty}</b></div>`).join("")}</div><div class="ticket-actions"><button class="muted">${esc(o.pay||"Payment")} · ₹${o.total}</button><button data-paid="${o.id}" class="${o.paymentStatus==="paid"?"primary":"secondary"}">${o.paymentStatus==="paid"?"Paid":"Mark paid"}</button><button data-confirm="${o.id}" class="secondary">Confirm on WhatsApp</button><button data-status="${o.id}" data-next="${o.status==="done"?"new":"done"}" class="primary">${o.status==="done"?"Undo done":"Mark done"}</button><button data-ready="${o.id}" class="primary">Notify Ready</button><button data-reject="${o.id}" class="danger">Reject / Cancel</button><button data-delete="${o.id}" class="danger">Delete DB</button></div></article>`}).join(""):`<div class="panel empty">No orders to show.</div>`;
  document.querySelectorAll("[data-paid]").forEach(b=>b.onclick=()=>updateDoc(doc(db,"orders",b.dataset.paid),{paymentStatus:"paid"}));
+ document.querySelectorAll("[data-confirm]").forEach(b=>b.onclick=()=>{const o=latest.find(x=>x.id===b.dataset.confirm);if(!o)return;const msg=`Hi ${o.name} 👋🍰
+
+Your order has been confirmed successfully!
+
+📅 Collection Date: ${o.collectionDate || (o.hasOffer?'15th August':'Not selected')}
+
+Thank you for ordering from Aly's Dessert. Please be patient while we prepare your order. 😊
+
+We will message you again when your order is ready for collection.`;openWhatsApp(o.phone,msg)});
+ document.querySelectorAll("[data-ready]").forEach(b=>b.onclick=()=>{const o=latest.find(x=>x.id===b.dataset.ready);if(!o)return;const msg=`Hello ${o.name} 👋
+
+Your order is complete! 🎉
+
+Please collect it from our house at E-49.
+
+Thank you for ordering from Aly's Dessert ❤️`;openWhatsApp(o.phone,msg)});
  document.querySelectorAll("[data-status]").forEach(b=>b.onclick=()=>updateDoc(doc(db,"orders",b.dataset.status),{status:b.dataset.next}));
  document.querySelectorAll("[data-reject]").forEach(b=>b.onclick=()=>{if(confirm("Reject/cancel this order? It will release its offer slot."))updateDoc(doc(db,"orders",b.dataset.reject),{status:"cancelled",cancelledAt:new Date().toISOString()})});
  document.querySelectorAll("[data-delete]").forEach(b=>b.onclick=()=>{if(confirm("Delete this order permanently from Firebase?"))deleteDoc(doc(db,"orders",b.dataset.delete))});
