@@ -66,11 +66,15 @@ function openWhatsApp(phone,message){
 }
 
 function render(){
- const active=latest.filter(o=>o.status==="new"), done=latest.filter(o=>o.status==="done"), offerPending=active.filter(o=>o.hasOffer).length;
- const active16=active.filter(o=>orderDateKey(o)===ACTIVE_OFFER_DATE).length;
+ // Read-only dashboard filter: use the selected collection date for stats and preparation.
+ // No Firebase order data is modified here.
+ const dashboardOrders=dateFilter==="all"?latest:latest.filter(o=>orderDateKey(o)===dateFilter);
+ const active=dashboardOrders.filter(o=>o.status==="new"), done=dashboardOrders.filter(o=>o.status==="done"), offerPending=active.filter(o=>o.hasOffer).length;
+ const slotDate=dateFilter==="all"?ACTIVE_OFFER_DATE:dateFilter;
+ const activeForSlot=latest.filter(o=>o.status==="new"&&orderDateKey(o)===slotDate).length;
  let shown=hideCompleted?latest.filter(o=>o.status!=="done"):latest;
  if(dateFilter!=="all") shown=shown.filter(o=>orderDateKey(o)===dateFilter);
- document.getElementById("count").textContent=latest.length;document.getElementById("sales").textContent="₹"+latest.filter(o=>o.status!=="cancelled").reduce((s,o)=>s+(Number(o.total)||0),0);document.getElementById("pending").textContent=active.length;document.getElementById("done").textContent=done.length;document.getElementById("offerPending").textContent=offerPending;document.getElementById("offerLeft").textContent=Math.max(0,DATE_LIMIT-active16);
+ document.getElementById("count").textContent=dashboardOrders.length;document.getElementById("sales").textContent="₹"+dashboardOrders.filter(o=>o.status!=="cancelled").reduce((s,o)=>s+(Number(o.total)||0),0);document.getElementById("pending").textContent=active.length;document.getElementById("done").textContent=done.length;document.getElementById("offerPending").textContent=offerPending;document.getElementById("offerLeft").textContent=Math.max(0,DATE_LIMIT-activeForSlot);
  [["filterAll","all"],["filter15","15 August"],["filter16","16 August"]].forEach(([id,value])=>{const b=document.getElementById(id);if(b)b.className=dateFilter===value?"secondary":"muted";});
  renderStock();
  renderPreparation(active);
