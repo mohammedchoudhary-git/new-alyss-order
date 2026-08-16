@@ -19,7 +19,7 @@ button.primary,button.secondary,button.danger{border:0;border-radius:10px;paddin
 </head>
 <body><main class="wrap">
 <header class="top"><div class="eyebrow">Order Now</div><h1>Aly's Dessert</h1><div class="sub">Crafted with Love, Served with Sweetness</div></header>
-<section class="offer"><h3>🇮🇳 80 Years, 80 Rupees — Independence Day Special</h3><p>15th & 16th August only · Selected Bowl Cakes & Pancakes at ₹80</p><span id="offerBadge" class="badge">Loading offer…</span></section>
+<section class="offer"><h3>🍰 Aly's Dessert Offer Has Ended</h3><p>Thank you for the incredible love and support!</p><span class="badge">OFFER CLOSED</span></section>
 <div id="app"></div>
 <div class="note">Gulshan Colony, E/49, 4th Floor, Next to Police Quarter, Versova, Andheri West, Mumbai – 400061</div>
 </main>
@@ -88,24 +88,17 @@ function copyText(value,buttonId){
  });
 }
 function renderForm(){
- const app=document.getElementById("app");
- const amount=total();
- app.innerHTML=`<div class="card">${menuSection("Offer Bowl Cakes — ₹80",OFFER_BOWL)}${menuSection("Offer Pancakes — ₹80",OFFER_PANCAKE)}${menuSection("Combo",COMBO)}${menuSection("Regular Menu",REGULAR)}
- <label>Your name</label><input id="name" placeholder="e.g. Riya Sharma">
- <label>Phone number</label><input id="phone" type="tel" placeholder="e.g. 98765 43210">
- <label>Room / Flat no.</label><input id="room" placeholder="e.g. B-204">
- ${dateSelector()}<label>Payment mode</label><select id="pay"><option>Cash on delivery</option><option>UPI / GPay</option></select>
- <div class="total"><span>Total</span><b>₹${amount}</b></div>
- ${paymentBox()}
- <button id="submit" class="primary">Send order</button></div>`;
- bindQty();
- const pay=document.getElementById("pay"), upiBox=document.getElementById("upiBox");
- const toggleUpi=()=>upiBox.style.display=pay.value==="UPI / GPay"?"block":"none";
- pay.onchange=toggleUpi;
- toggleUpi();
- copyText("khizarchoudhary786-1@oksbi","copyUpi");
- copyText("9821285885","copyPhone");
- document.getElementById("submit").onclick=submitOrder;
+  // Offer is closed: customer ordering UI is intentionally not rendered.
+  // Firebase configuration and existing order data are not modified.
+  const app=document.getElementById("app");
+  app.innerHTML=`<div class="card confirm">
+    <div style="font-size:30px;margin-bottom:8px">🍰❤️</div>
+    <h2>Thank You for Your Amazing Support!</h2>
+    <p>Our Independence Day special offer has now ended.</p>
+    <p>We are fully booked and busy preparing all the delicious orders received during the offer.</p>
+    <p><b>Thank you for making Aly's Dessert's offer so special! ✨</b></p>
+    <p>Stay tuned for our next sweet surprise. 🍫🍰</p>
+  </div>`;
 }
 function confirmView(o){
  return `<div class="card confirm"><div>✓ ORDER RECEIVED</div><h2>Thank you, ${o.name}!</h2><p>Your order has been sent to the kitchen.</p><p><b>Collection Date: ${o.collectionDate}</b></p><div class="actions"><button class="secondary" id="newBtn">Place another order</button></div></div>`;
@@ -143,7 +136,7 @@ onSnapshot(query(ordersCol,orderBy("time","desc")),s=>{
    }
  });
  const offerLeft=remainingSlots(ACTIVE_OFFER_DATE);
- document.getElementById("offerBadge").textContent=`${offerLeft} offer slot${offerLeft===1?"":"s"} left`;
+ const offerBadge=document.getElementById("offerBadge");if(offerBadge) offerBadge.textContent=`${offerLeft} offer slot${offerLeft===1?"":"s"} left`;
  const select=document.getElementById("collectionDate");
  if(select){
    const current=select.value;
